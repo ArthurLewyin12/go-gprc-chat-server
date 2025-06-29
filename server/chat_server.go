@@ -74,7 +74,6 @@ type chatServer struct {
 	redisClient *redis.Client
 	surrealDB   *surrealdb.DB
 	onlineUsers map[string]map[string]bool // channel -> user -> onlineStatus
-	userStreams map[string]pb.Chat_ChatServer // user -> stream
 }
 
 func newServer() *chatServer {
@@ -115,7 +114,7 @@ func newServer() *chatServer {
 
 	log.Println("✅ Connexions SurrealDB et Redis établies")
 
-	return &chatServer{redisClient: rdb, surrealDB: db, onlineUsers: make(map[string]map[string]bool), userStreams: make(map[string]pb.Chat_ChatServer)}
+	return &chatServer{redisClient: rdb, surrealDB: db, onlineUsers: make(map[string]map[string]bool)}
 }
 
 func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
@@ -159,9 +158,6 @@ func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
 
 	log.Printf("User %s joined channel %s", user, channel)
 
-	s.userStreams[user] = stream
-	defer delete(s.userStreams, user)
-
 	// Annoncer la présence de l'utilisateur
 	s.publishPresence(ctx, channel, user, true)
 	defer s.publishPresence(ctx, channel, user, false)
@@ -174,6 +170,7 @@ func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
 	// Lancer les goroutines pour écouter les événements
 	go s.subscribeToSurrealDBMessages(stream, channel)
 	go s.subscribeToPresenceAndTyping(stream, channel)
+	go s.subscribeToDirectMessages(stream, user)
 
 	
 
@@ -329,17 +326,16 @@ func (s *chatServer) publishTypingEvent(ctx context.Context, channel, user strin
 func (s *chatServer) handleDirectMessage(ctx context.Context, dm *pb.DirectMessage) {
 	log.Printf("Received direct message from %s to %s: %s", dm.Sender, dm.Recipient, dm.Message)
 
-	recipientStream, ok := s.userStreams[dm.Recipient]
-	if !ok {
-		log.Printf("Recipient %s is not online or stream not found", dm.Recipient)
-		// Optionally send an error message back to the sender
+	// Publish the direct message to the recipient's Redis channel
+	dmChannel := "dm:" + dm.Recipient
+	payload, err := json.Marshal(dm)
+	if err != nil {
+		log.Printf("Failed to marshal direct message: %v", err)
 		return
 	}
 
-	if err := recipientStream.Send(&pb.ServerEvent{
-		Event: &pb.ServerEvent_DirectMessage{DirectMessage: dm},
-	}); err != nil {
-		log.Printf("Failed to send direct message to %s: %v", dm.Recipient, err)
+	if err := s.redisClient.Publish(ctx, dmChannel, payload).Err(); err != nil {
+		log.Printf("Failed to publish direct message to Redis: %v", err)
 	}
 }
 
@@ -457,6 +453,41 @@ func (s *chatServer) subscribeToPresenceAndTyping(stream pb.Chat_ChatServer, cha
 					log.Printf("Error sending user list event: %v", err)
 					return
 				}
+			}
+		}
+	}
+}
+
+func (s *chatServer) subscribeToDirectMessages(stream pb.Chat_ChatServer, user string) {
+	ctx := stream.Context()
+
+	dmChannel := "dm:" + user
+	pubsub := s.redisClient.Subscribe(ctx, dmChannel)
+	defer pubsub.Close()
+
+	log.Printf("Subscribed to Redis DM channel: %s for user %s", dmChannel, user)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case msg := <-pubsub.Channel():
+			if msg == nil {
+				continue
+			}
+
+			var dm pb.DirectMessage
+			if err := json.Unmarshal([]byte(msg.Payload), &dm); err != nil {
+				log.Printf("Failed to unmarshal direct message from Redis: %v", err)
+				continue
+			}
+
+			log.Printf("Sending direct message to client %s: %+v", user, dm)
+			if err := stream.Send(&pb.ServerEvent{
+				Event: &pb.ServerEvent_DirectMessage{DirectMessage: &dm},
+			}); err != nil {
+				log.Printf("Error sending direct message to client %s: %v", user, err)
+				return
 			}
 		}
 	}

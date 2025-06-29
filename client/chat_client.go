@@ -38,7 +38,8 @@ func main() {
 	})
 	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Printf("Error connecting to server: %v", err)
+		return
 	}
 	defer conn.Close()
 
@@ -63,11 +64,13 @@ func main() {
 
 		regRes, err := authClient.Register(context.Background(), &pb.RegisterRequest{Username: username, Password: password})
 		if err != nil {
-			log.Fatalf("Registration failed: %v", err)
+			log.Printf("Registration failed: %v", err)
+			return
 		}
 
 		if !regRes.GetSuccess() {
-			log.Fatalf("Registration error: %s", regRes.GetError())
+			log.Printf("Registration error: %s", regRes.GetError())
+			return
 		}
 
 		log.Printf("Registration successful for %s. Please login.", username)
@@ -84,11 +87,13 @@ func main() {
 
 	loginRes, err := authClient.Login(context.Background(), &pb.LoginRequest{Username: username, Password: password})
 	if err != nil {
-		log.Fatalf("Login failed: %v", err)
+		log.Printf("Login failed: %v", err)
+		return
 	}
 
 	if loginRes.GetError() != "" {
-		log.Fatalf("Login error: %s", loginRes.GetError())
+		log.Printf("Login error: %s", loginRes.GetError())
+		return
 	}
 
 	authToken := loginRes.GetToken()
@@ -103,14 +108,16 @@ func main() {
 
 	stream, err := chatClient.Chat(context.Background())
 	if err != nil {
-		log.Fatalf("Error creating stream: %v", err)
+		log.Printf("Error creating stream: %v", err)
+		return
 	}
 
 	// Envoyer le message d'initialisation avec le token
 	joinMsg := &pb.ChatMessage{User: username, Channel: channel, Message: "has joined"}
 	initialEvent := &pb.ClientEvent{AuthToken: authToken, Event: &pb.ClientEvent_ChatMessage{ChatMessage: joinMsg}}
 	if err := stream.Send(initialEvent); err != nil {
-		log.Fatalf("Failed to join channel: %v", err)
+		log.Printf("Failed to join channel: %v", err)
+		return
 	}
 
 	// Goroutine pour recevoir les événements du serveur
@@ -118,7 +125,8 @@ func main() {
 		for {
 			serverEvent, err := stream.Recv()
 			if err != nil {
-				log.Fatalf("Failed to receive an event: %v", err)
+				log.Printf("Failed to receive an event: %v", err)
+				return // Exit goroutine on error
 			}
 
 			switch e := serverEvent.Event.(type) {
