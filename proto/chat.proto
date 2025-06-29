@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = "grpc_golang/proto";
+
+package chat;
+
+// Le service Chat principal
+service Chat {
+  // Établit un flux de communication bi-directionnel.
+  // Le client envoie des ClientEvent et le serveur répond avec des ServerEvent.
+  rpc Chat(stream ClientEvent) returns (stream ServerEvent) {};
+}
+
+// --- Messages envoyés par le Client au Serveur ---
+
+message ClientEvent {
+  oneof event {
+    ChatMessage chat_message = 1;
+    TypingEvent typing_event = 2;
+  }
+}
+
+// --- Messages envoyés par le Serveur au Client ---
+
+message ServerEvent {
+  oneof event {
+    ChatMessage chat_message = 1;
+    TypingEvent typing_event = 2;
+    PresenceEvent presence_event = 3;
+  }
+}
+
+// --- Définitions des types d'événements ---
+
+// Un message de chat standard
+message ChatMessage {
+  string user = 1;
+  string message = 2;
+  string channel = 3;
+}
+
+// Un événement indiquant que quelqu'un est en train d'écrire
+message TypingEvent {
+  string user = 1;
+  string channel = 2;
+  bool is_typing = 3; // Vrai si l'utilisateur commence à écrire, faux s'il s'arrête
+}
+
+// Un événement de présence (connexion/déconnexion)
+message PresenceEvent {
+  string user = 1;
+  string channel = 2;
+  bool is_online = 3; // Vrai pour une connexion, faux pour une déconnexion
+}
