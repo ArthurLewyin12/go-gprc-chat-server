@@ -14,6 +14,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/net v0.41.0 // indirect

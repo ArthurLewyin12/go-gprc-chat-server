@@ -10,11 +10,43 @@ import (
 
 	pb "grpc_golang/proto"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 	"github.com/surrealdb/surrealdb.go"
 	"github.com/surrealdb/surrealdb.go/pkg/models"
 	"google.golang.org/grpc"
 )
+
+// AuthClaims defines the JWT claims
+type AuthClaims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
+// Define a secret key for JWT signing (should be loaded from config in real app)
+var JwtKey = []byte("my_secret_key")
+
+// ValidateToken validates the JWT and returns the username if valid
+func ValidateToken(tokenString string) (string, error) {
+	claims := &AuthClaims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return JwtKey, nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if !token.Valid {
+		return "", fmt.Errorf("invalid token")
+	}
+
+	return claims.Username, nil
+}
 
 const (
 	port = ":50051"
@@ -87,6 +119,17 @@ func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
 		return err
 	}
 
+	// Validate the auth token from the initial ClientEvent
+	authToken := initEvent.GetAuthToken()
+	if authToken == "" {
+		return fmt.Errorf("missing authentication token in initial event")
+	}
+
+	usernameFromToken, err := ValidateToken(authToken)
+	if err != nil {
+		return fmt.Errorf("invalid authentication token: %v", err)
+	}
+
 	var channel string
 	var user string
 
@@ -94,6 +137,10 @@ func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
 	case *pb.ClientEvent_ChatMessage:
 		channel = event.ChatMessage.Channel
 		user = event.ChatMessage.User
+		// Ensure the user from the token matches the user in the message
+		if user != usernameFromToken {
+			return fmt.Errorf("username mismatch: token user %s, message user %s", usernameFromToken, user)
+		}
 		// Process the initial chat message if it exists
 		if event.ChatMessage.Message != "" {
 			s.storeAndPublishChatMessage(ctx, event.ChatMessage)
@@ -130,17 +177,47 @@ func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
 			return nil // Déconnexion normale
 		}
 
+		// Validate the auth token for subsequent events
+		authToken := clientEvent.GetAuthToken()
+		if authToken == "" {
+			log.Printf("Missing authentication token in subsequent event")
+			continue // Or return an error, depending on desired behavior
+		}
+
+		usernameFromToken, err := ValidateToken(authToken)
+		if err != nil {
+			log.Printf("Invalid authentication token in subsequent event: %v", err)
+			continue // Or return an error
+		}
+
+		// Ensure the user from the token matches the user in the message
+		// This assumes the user field in ChatMessage/TypingEvent/DirectMessage is the sender
+		var eventUser string
+		switch event := clientEvent.Event.(type) {
+		case *pb.ClientEvent_ChatMessage:
+			eventUser = event.ChatMessage.User
+		case *pb.ClientEvent_TypingEvent:
+			eventUser = event.TypingEvent.User
+		case *pb.ClientEvent_DirectMessage:
+			eventUser = event.DirectMessage.Sender
+		}
+
+		if eventUser != usernameFromToken {
+			log.Printf("Username mismatch in subsequent event: token user %s, event user %s", usernameFromToken, eventUser)
+			continue // Or return an error
+		}
+
 		// Vérifier le type d'événement reçu
-					switch event := clientEvent.Event.(type) {
-			case *pb.ClientEvent_ChatMessage:
-				s.storeAndPublishChatMessage(ctx, event.ChatMessage)
-			case *pb.ClientEvent_TypingEvent:
-				s.publishTypingEvent(ctx, event.TypingEvent.Channel, event.TypingEvent.User, event.TypingEvent.IsTyping)
-			case *pb.ClientEvent_DirectMessage:
-				s.handleDirectMessage(ctx, event.DirectMessage)
-			default:
-				log.Printf("Unknown client event type: %T", event)
-			}
+		switch event := clientEvent.Event.(type) {
+		case *pb.ClientEvent_ChatMessage:
+			s.storeAndPublishChatMessage(ctx, event.ChatMessage)
+		case *pb.ClientEvent_TypingEvent:
+			s.publishTypingEvent(ctx, event.TypingEvent.Channel, event.TypingEvent.User, event.TypingEvent.IsTyping)
+		case *pb.ClientEvent_DirectMessage:
+			s.handleDirectMessage(ctx, event.DirectMessage)
+		default:
+			log.Printf("Unknown client event type: %T", event)
+		}
 	}
 }
 
@@ -383,7 +460,10 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(AuthInterceptor),
+		grpc.StreamInterceptor(AuthStreamInterceptor),
+	)
 	chatServerInstance := newServer()
 
 	// Fermer proprement les connexions à l'arrêt
@@ -397,6 +477,7 @@ func main() {
 	}()
 
 	pb.RegisterChatServer(grpcServer, chatServerInstance)
+	pb.RegisterAuthServer(grpcServer, newAuthServer())
 	log.Printf("🚀 Chat Server listening at %v", lis.Addr())
 
 	if err := grpcServer.Serve(lis); err != nil {

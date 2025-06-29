@@ -21,8 +21,217 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type LoginRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginRequest) Reset() {
+	*x = LoginRequest{}
+	mi := &file_chat_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginRequest) ProtoMessage() {}
+
+func (x *LoginRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginRequest.ProtoReflect.Descriptor instead.
+func (*LoginRequest) Descriptor() ([]byte, []int) {
+	return file_chat_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *LoginRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *LoginRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+type LoginResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginResponse) Reset() {
+	*x = LoginResponse{}
+	mi := &file_chat_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginResponse) ProtoMessage() {}
+
+func (x *LoginResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginResponse.ProtoReflect.Descriptor instead.
+func (*LoginResponse) Descriptor() ([]byte, []int) {
+	return file_chat_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *LoginResponse) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *LoginResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type RegisterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterRequest) Reset() {
+	*x = RegisterRequest{}
+	mi := &file_chat_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterRequest) ProtoMessage() {}
+
+func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterRequest.ProtoReflect.Descriptor instead.
+func (*RegisterRequest) Descriptor() ([]byte, []int) {
+	return file_chat_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *RegisterRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+type RegisterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterResponse) Reset() {
+	*x = RegisterResponse{}
+	mi := &file_chat_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterResponse) ProtoMessage() {}
+
+func (x *RegisterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterResponse.ProtoReflect.Descriptor instead.
+func (*RegisterResponse) Descriptor() ([]byte, []int) {
+	return file_chat_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *RegisterResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RegisterResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 type ClientEvent struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	AuthToken string                 `protobuf:"bytes,1,opt,name=auth_token,json=authToken,proto3" json:"auth_token,omitempty"`
 	// Types that are valid to be assigned to Event:
 	//
 	//	*ClientEvent_ChatMessage
@@ -35,7 +244,7 @@ type ClientEvent struct {
 
 func (x *ClientEvent) Reset() {
 	*x = ClientEvent{}
-	mi := &file_chat_proto_msgTypes[0]
+	mi := &file_chat_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +256,7 @@ func (x *ClientEvent) String() string {
 func (*ClientEvent) ProtoMessage() {}
 
 func (x *ClientEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[0]
+	mi := &file_chat_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +269,14 @@ func (x *ClientEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClientEvent.ProtoReflect.Descriptor instead.
 func (*ClientEvent) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{0}
+	return file_chat_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ClientEvent) GetAuthToken() string {
+	if x != nil {
+		return x.AuthToken
+	}
+	return ""
 }
 
 func (x *ClientEvent) GetEvent() isClientEvent_Event {
@@ -102,15 +318,15 @@ type isClientEvent_Event interface {
 }
 
 type ClientEvent_ChatMessage struct {
-	ChatMessage *ChatMessage `protobuf:"bytes,1,opt,name=chat_message,json=chatMessage,proto3,oneof"`
+	ChatMessage *ChatMessage `protobuf:"bytes,2,opt,name=chat_message,json=chatMessage,proto3,oneof"`
 }
 
 type ClientEvent_TypingEvent struct {
-	TypingEvent *TypingEvent `protobuf:"bytes,2,opt,name=typing_event,json=typingEvent,proto3,oneof"`
+	TypingEvent *TypingEvent `protobuf:"bytes,3,opt,name=typing_event,json=typingEvent,proto3,oneof"`
 }
 
 type ClientEvent_DirectMessage struct {
-	DirectMessage *DirectMessage `protobuf:"bytes,3,opt,name=direct_message,json=directMessage,proto3,oneof"`
+	DirectMessage *DirectMessage `protobuf:"bytes,4,opt,name=direct_message,json=directMessage,proto3,oneof"`
 }
 
 func (*ClientEvent_ChatMessage) isClientEvent_Event() {}
@@ -135,7 +351,7 @@ type ServerEvent struct {
 
 func (x *ServerEvent) Reset() {
 	*x = ServerEvent{}
-	mi := &file_chat_proto_msgTypes[1]
+	mi := &file_chat_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -147,7 +363,7 @@ func (x *ServerEvent) String() string {
 func (*ServerEvent) ProtoMessage() {}
 
 func (x *ServerEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[1]
+	mi := &file_chat_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +376,7 @@ func (x *ServerEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerEvent.ProtoReflect.Descriptor instead.
 func (*ServerEvent) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{1}
+	return file_chat_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ServerEvent) GetEvent() isServerEvent_Event {
@@ -262,7 +478,7 @@ type DirectMessage struct {
 
 func (x *DirectMessage) Reset() {
 	*x = DirectMessage{}
-	mi := &file_chat_proto_msgTypes[2]
+	mi := &file_chat_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -274,7 +490,7 @@ func (x *DirectMessage) String() string {
 func (*DirectMessage) ProtoMessage() {}
 
 func (x *DirectMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[2]
+	mi := &file_chat_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -287,7 +503,7 @@ func (x *DirectMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DirectMessage.ProtoReflect.Descriptor instead.
 func (*DirectMessage) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{2}
+	return file_chat_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *DirectMessage) GetSender() string {
@@ -329,7 +545,7 @@ type UserListEvent struct {
 
 func (x *UserListEvent) Reset() {
 	*x = UserListEvent{}
-	mi := &file_chat_proto_msgTypes[3]
+	mi := &file_chat_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -341,7 +557,7 @@ func (x *UserListEvent) String() string {
 func (*UserListEvent) ProtoMessage() {}
 
 func (x *UserListEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[3]
+	mi := &file_chat_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -354,7 +570,7 @@ func (x *UserListEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserListEvent.ProtoReflect.Descriptor instead.
 func (*UserListEvent) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{3}
+	return file_chat_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UserListEvent) GetChannel() string {
@@ -383,7 +599,7 @@ type ChatMessage struct {
 
 func (x *ChatMessage) Reset() {
 	*x = ChatMessage{}
-	mi := &file_chat_proto_msgTypes[4]
+	mi := &file_chat_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -395,7 +611,7 @@ func (x *ChatMessage) String() string {
 func (*ChatMessage) ProtoMessage() {}
 
 func (x *ChatMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[4]
+	mi := &file_chat_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -408,7 +624,7 @@ func (x *ChatMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
 func (*ChatMessage) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{4}
+	return file_chat_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ChatMessage) GetUser() string {
@@ -444,7 +660,7 @@ type TypingEvent struct {
 
 func (x *TypingEvent) Reset() {
 	*x = TypingEvent{}
-	mi := &file_chat_proto_msgTypes[5]
+	mi := &file_chat_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -456,7 +672,7 @@ func (x *TypingEvent) String() string {
 func (*TypingEvent) ProtoMessage() {}
 
 func (x *TypingEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[5]
+	mi := &file_chat_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -469,7 +685,7 @@ func (x *TypingEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TypingEvent.ProtoReflect.Descriptor instead.
 func (*TypingEvent) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{5}
+	return file_chat_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *TypingEvent) GetUser() string {
@@ -505,7 +721,7 @@ type PresenceEvent struct {
 
 func (x *PresenceEvent) Reset() {
 	*x = PresenceEvent{}
-	mi := &file_chat_proto_msgTypes[6]
+	mi := &file_chat_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -517,7 +733,7 @@ func (x *PresenceEvent) String() string {
 func (*PresenceEvent) ProtoMessage() {}
 
 func (x *PresenceEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[6]
+	mi := &file_chat_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -530,7 +746,7 @@ func (x *PresenceEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PresenceEvent.ProtoReflect.Descriptor instead.
 func (*PresenceEvent) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{6}
+	return file_chat_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *PresenceEvent) GetUser() string {
@@ -559,11 +775,25 @@ var File_chat_proto protoreflect.FileDescriptor
 const file_chat_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"chat.proto\x12\x04chat\"\xc4\x01\n" +
-	"\vClientEvent\x126\n" +
-	"\fchat_message\x18\x01 \x01(\v2\x11.chat.ChatMessageH\x00R\vchatMessage\x126\n" +
-	"\ftyping_event\x18\x02 \x01(\v2\x11.chat.TypingEventH\x00R\vtypingEvent\x12<\n" +
-	"\x0edirect_message\x18\x03 \x01(\v2\x13.chat.DirectMessageH\x00R\rdirectMessageB\a\n" +
+	"chat.proto\x12\x04chat\"F\n" +
+	"\fLoginRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\";\n" +
+	"\rLoginResponse\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"I\n" +
+	"\x0fRegisterRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"B\n" +
+	"\x10RegisterResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\"\xe3\x01\n" +
+	"\vClientEvent\x12\x1d\n" +
+	"\n" +
+	"auth_token\x18\x01 \x01(\tR\tauthToken\x126\n" +
+	"\fchat_message\x18\x02 \x01(\v2\x11.chat.ChatMessageH\x00R\vchatMessage\x126\n" +
+	"\ftyping_event\x18\x03 \x01(\v2\x11.chat.TypingEventH\x00R\vtypingEvent\x12<\n" +
+	"\x0edirect_message\x18\x04 \x01(\v2\x13.chat.DirectMessageH\x00R\rdirectMessageB\a\n" +
 	"\x05event\"\xc1\x02\n" +
 	"\vServerEvent\x126\n" +
 	"\fchat_message\x18\x01 \x01(\v2\x11.chat.ChatMessageH\x00R\vchatMessage\x126\n" +
@@ -593,7 +823,10 @@ const file_chat_proto_rawDesc = "" +
 	"\achannel\x18\x02 \x01(\tR\achannel\x12\x1b\n" +
 	"\tis_online\x18\x03 \x01(\bR\bisOnline2:\n" +
 	"\x04Chat\x122\n" +
-	"\x04Chat\x12\x11.chat.ClientEvent\x1a\x11.chat.ServerEvent\"\x00(\x010\x01B\x13Z\x11grpc_golang/protob\x06proto3"
+	"\x04Chat\x12\x11.chat.ClientEvent\x1a\x11.chat.ServerEvent\"\x00(\x010\x012w\n" +
+	"\x04Auth\x122\n" +
+	"\x05Login\x12\x12.chat.LoginRequest\x1a\x13.chat.LoginResponse\"\x00\x12;\n" +
+	"\bRegister\x12\x15.chat.RegisterRequest\x1a\x16.chat.RegisterResponse\"\x00B\x13Z\x11grpc_golang/protob\x06proto3"
 
 var (
 	file_chat_proto_rawDescOnce sync.Once
@@ -607,32 +840,40 @@ func file_chat_proto_rawDescGZIP() []byte {
 	return file_chat_proto_rawDescData
 }
 
-var file_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_chat_proto_goTypes = []any{
-	(*ClientEvent)(nil),   // 0: chat.ClientEvent
-	(*ServerEvent)(nil),   // 1: chat.ServerEvent
-	(*DirectMessage)(nil), // 2: chat.DirectMessage
-	(*UserListEvent)(nil), // 3: chat.UserListEvent
-	(*ChatMessage)(nil),   // 4: chat.ChatMessage
-	(*TypingEvent)(nil),   // 5: chat.TypingEvent
-	(*PresenceEvent)(nil), // 6: chat.PresenceEvent
+	(*LoginRequest)(nil),     // 0: chat.LoginRequest
+	(*LoginResponse)(nil),    // 1: chat.LoginResponse
+	(*RegisterRequest)(nil),  // 2: chat.RegisterRequest
+	(*RegisterResponse)(nil), // 3: chat.RegisterResponse
+	(*ClientEvent)(nil),      // 4: chat.ClientEvent
+	(*ServerEvent)(nil),      // 5: chat.ServerEvent
+	(*DirectMessage)(nil),    // 6: chat.DirectMessage
+	(*UserListEvent)(nil),    // 7: chat.UserListEvent
+	(*ChatMessage)(nil),      // 8: chat.ChatMessage
+	(*TypingEvent)(nil),      // 9: chat.TypingEvent
+	(*PresenceEvent)(nil),    // 10: chat.PresenceEvent
 }
 var file_chat_proto_depIdxs = []int32{
-	4, // 0: chat.ClientEvent.chat_message:type_name -> chat.ChatMessage
-	5, // 1: chat.ClientEvent.typing_event:type_name -> chat.TypingEvent
-	2, // 2: chat.ClientEvent.direct_message:type_name -> chat.DirectMessage
-	4, // 3: chat.ServerEvent.chat_message:type_name -> chat.ChatMessage
-	5, // 4: chat.ServerEvent.typing_event:type_name -> chat.TypingEvent
-	6, // 5: chat.ServerEvent.presence_event:type_name -> chat.PresenceEvent
-	3, // 6: chat.ServerEvent.user_list_event:type_name -> chat.UserListEvent
-	2, // 7: chat.ServerEvent.direct_message:type_name -> chat.DirectMessage
-	0, // 8: chat.Chat.Chat:input_type -> chat.ClientEvent
-	1, // 9: chat.Chat.Chat:output_type -> chat.ServerEvent
-	9, // [9:10] is the sub-list for method output_type
-	8, // [8:9] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	8,  // 0: chat.ClientEvent.chat_message:type_name -> chat.ChatMessage
+	9,  // 1: chat.ClientEvent.typing_event:type_name -> chat.TypingEvent
+	6,  // 2: chat.ClientEvent.direct_message:type_name -> chat.DirectMessage
+	8,  // 3: chat.ServerEvent.chat_message:type_name -> chat.ChatMessage
+	9,  // 4: chat.ServerEvent.typing_event:type_name -> chat.TypingEvent
+	10, // 5: chat.ServerEvent.presence_event:type_name -> chat.PresenceEvent
+	7,  // 6: chat.ServerEvent.user_list_event:type_name -> chat.UserListEvent
+	6,  // 7: chat.ServerEvent.direct_message:type_name -> chat.DirectMessage
+	4,  // 8: chat.Chat.Chat:input_type -> chat.ClientEvent
+	0,  // 9: chat.Auth.Login:input_type -> chat.LoginRequest
+	2,  // 10: chat.Auth.Register:input_type -> chat.RegisterRequest
+	5,  // 11: chat.Chat.Chat:output_type -> chat.ServerEvent
+	1,  // 12: chat.Auth.Login:output_type -> chat.LoginResponse
+	3,  // 13: chat.Auth.Register:output_type -> chat.RegisterResponse
+	11, // [11:14] is the sub-list for method output_type
+	8,  // [8:11] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_chat_proto_init() }
@@ -640,12 +881,12 @@ func file_chat_proto_init() {
 	if File_chat_proto != nil {
 		return
 	}
-	file_chat_proto_msgTypes[0].OneofWrappers = []any{
+	file_chat_proto_msgTypes[4].OneofWrappers = []any{
 		(*ClientEvent_ChatMessage)(nil),
 		(*ClientEvent_TypingEvent)(nil),
 		(*ClientEvent_DirectMessage)(nil),
 	}
-	file_chat_proto_msgTypes[1].OneofWrappers = []any{
+	file_chat_proto_msgTypes[5].OneofWrappers = []any{
 		(*ServerEvent_ChatMessage)(nil),
 		(*ServerEvent_TypingEvent)(nil),
 		(*ServerEvent_PresenceEvent)(nil),
@@ -658,9 +899,9 @@ func file_chat_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_chat_proto_rawDesc), len(file_chat_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   11,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_chat_proto_goTypes,
 		DependencyIndexes: file_chat_proto_depIdxs,
