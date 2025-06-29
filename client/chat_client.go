@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	pb "grpc_golang/proto"
 
@@ -71,27 +72,50 @@ func main() {
 				}
 				fmt.Printf("*** %s has %s the channel %s ***\n", presence.User, status, presence.Channel)
 			case *pb.ServerEvent_TypingEvent:
-				typing := e.TypingEvent
-				if typing.IsTyping {
-					fmt.Printf("*** %s is typing in %s ***\n", typing.User, typing.Channel)
-				} else {
-					fmt.Printf("*** %s stopped typing in %s ***\n", typing.User, typing.Channel)
-				}
-			}
+		typing := e.TypingEvent
+		if typing.IsTyping {
+			fmt.Printf("*** %s is typing in %s ***\n", typing.User, typing.Channel)
+		} else {
+			fmt.Printf("*** %s stopped typing in %s ***\n", typing.User, typing.Channel)
+		}
+	case *pb.ServerEvent_UserListEvent:
+		userList := e.UserListEvent
+		fmt.Printf("*** Online users in %s: %v ***\n", userList.Channel, userList.Users)
+	case *pb.ServerEvent_DirectMessage:
+		dm := e.DirectMessage
+		fmt.Printf("[DM from %s to %s]: %s\n", dm.Sender, dm.Recipient, dm.Message)
+	}
 		}
 	}()
 
 	// Boucle pour envoyer les messages de l'utilisateur
-	fmt.Printf("Joined channel %s. You can now start sending messages.\n", channel)
+	fmt.Printf("Joined channel %s. You can now start sending messages. Type /dm <recipient> <message> for direct messages.\n", channel)
 	for scanner.Scan() {
-		msg := scanner.Text()
-		if msg == "" {
+		input := scanner.Text()
+		if input == "" {
 			continue
 		}
-		chatMsg := &pb.ChatMessage{User: user, Channel: channel, Message: msg}
-		clientEvent := &pb.ClientEvent{Event: &pb.ClientEvent_ChatMessage{ChatMessage: chatMsg}}
-		if err := stream.Send(clientEvent); err != nil {
-			log.Printf("Failed to send message: %v", err)
+
+		if len(input) > 3 && input[:3] == "/dm" {
+			parts := strings.SplitN(input[4:], " ", 2)
+			if len(parts) < 2 {
+				fmt.Println("Usage: /dm <recipient> <message>")
+				continue
+			}
+			recipient := parts[0]
+			dmMessage := parts[1]
+			dm := &pb.DirectMessage{Sender: user, Recipient: recipient, Message: dmMessage, Channel: channel}
+			clientEvent := &pb.ClientEvent{Event: &pb.ClientEvent_DirectMessage{DirectMessage: dm}}
+			if err := stream.Send(clientEvent); err != nil {
+				log.Printf("Failed to send direct message: %v", err)
+			}
+		} else {
+			msg := input
+			chatMsg := &pb.ChatMessage{User: user, Channel: channel, Message: msg}
+			clientEvent := &pb.ClientEvent{Event: &pb.ClientEvent_ChatMessage{ChatMessage: chatMsg}}
+			if err := stream.Send(clientEvent); err != nil {
+				log.Printf("Failed to send message: %v", err)
+			}
 		}
 	}
 }

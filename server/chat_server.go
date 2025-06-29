@@ -33,6 +33,8 @@ type chatServer struct {
 	pb.UnimplementedChatServer
 	redisClient *redis.Client
 	surrealDB   *surrealdb.DB
+	onlineUsers map[string]map[string]bool // channel -> user -> onlineStatus
+	userStreams map[string]pb.Chat_ChatServer // user -> stream
 }
 
 func newServer() *chatServer {
@@ -73,7 +75,7 @@ func newServer() *chatServer {
 
 	log.Println("✅ Connexions SurrealDB et Redis établies")
 
-	return &chatServer{redisClient: rdb, surrealDB: db}
+	return &chatServer{redisClient: rdb, surrealDB: db, onlineUsers: make(map[string]map[string]bool), userStreams: make(map[string]pb.Chat_ChatServer)}
 }
 
 func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
@@ -101,6 +103,9 @@ func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
 	}
 
 	log.Printf("User %s joined channel %s", user, channel)
+
+	s.userStreams[user] = stream
+	defer delete(s.userStreams, user)
 
 	// Annoncer la présence de l'utilisateur
 	s.publishPresence(ctx, channel, user, true)
@@ -131,6 +136,8 @@ func (s *chatServer) Chat(stream pb.Chat_ChatServer) error {
 				s.storeAndPublishChatMessage(ctx, event.ChatMessage)
 			case *pb.ClientEvent_TypingEvent:
 				s.publishTypingEvent(ctx, event.TypingEvent.Channel, event.TypingEvent.User, event.TypingEvent.IsTyping)
+			case *pb.ClientEvent_DirectMessage:
+				s.handleDirectMessage(ctx, event.DirectMessage)
 			default:
 				log.Printf("Unknown client event type: %T", event)
 			}
@@ -200,6 +207,11 @@ func (s *chatServer) storeAndPublishChatMessage(ctx context.Context, msg *pb.Cha
 }
 
 func (s *chatServer) publishPresence(ctx context.Context, channel, user string, isOnline bool) {
+	if s.onlineUsers[channel] == nil {
+		s.onlineUsers[channel] = make(map[string]bool)
+	}
+	s.onlineUsers[channel][user] = isOnline
+
 	pubsubChannel := "presence:" + channel
 	event := &pb.PresenceEvent{Channel: channel, User: user, IsOnline: isOnline}
 	payload, err := json.Marshal(event)
@@ -211,6 +223,8 @@ func (s *chatServer) publishPresence(ctx context.Context, channel, user string, 
 	if err := s.redisClient.Publish(ctx, pubsubChannel, payload).Err(); err != nil {
 		log.Printf("Failed to publish presence event: %v", err)
 	}
+
+	s.broadcastUserList(ctx, channel)
 }
 
 func (s *chatServer) publishTypingEvent(ctx context.Context, channel, user string, isTyping bool) {
@@ -224,6 +238,43 @@ func (s *chatServer) publishTypingEvent(ctx context.Context, channel, user strin
 
 	if err := s.redisClient.Publish(ctx, pubsubChannel, payload).Err(); err != nil {
 		log.Printf("Failed to publish typing event: %v", err)
+	}
+}
+
+func (s *chatServer) handleDirectMessage(ctx context.Context, dm *pb.DirectMessage) {
+	log.Printf("Received direct message from %s to %s: %s", dm.Sender, dm.Recipient, dm.Message)
+
+	recipientStream, ok := s.userStreams[dm.Recipient]
+	if !ok {
+		log.Printf("Recipient %s is not online or stream not found", dm.Recipient)
+		// Optionally send an error message back to the sender
+		return
+	}
+
+	if err := recipientStream.Send(&pb.ServerEvent{
+		Event: &pb.ServerEvent_DirectMessage{DirectMessage: dm},
+	}); err != nil {
+		log.Printf("Failed to send direct message to %s: %v", dm.Recipient, err)
+	}
+}
+
+func (s *chatServer) broadcastUserList(ctx context.Context, channel string) {
+	users := []string{}
+	for user, online := range s.onlineUsers[channel] {
+		if online {
+			users = append(users, user)
+		}
+	}
+
+	userListEvent := &pb.UserListEvent{Channel: channel, Users: users}
+	payload, err := json.Marshal(userListEvent)
+	if err != nil {
+		log.Printf("Failed to marshal user list event: %v", err)
+		return
+	}
+
+	if err := s.redisClient.Publish(ctx, "user_list:"+channel, payload).Err(); err != nil {
+		log.Printf("Failed to publish user list event: %v", err)
 	}
 }
 
@@ -271,11 +322,12 @@ func (s *chatServer) subscribeToSurrealDBMessages(stream pb.Chat_ChatServer, cha
 func (s *chatServer) subscribeToPresenceAndTyping(stream pb.Chat_ChatServer, channel string) {
 	ctx := stream.Context()
 
-	// S'abonner aux événements de présence et de frappe
+	// S'abonner aux événements de présence, de frappe et de liste d'utilisateurs
 	presenceChannel := "presence:" + channel
 	typingChannel := "typing:" + channel
+	userListChannel := "user_list:" + channel
 
-	pubsub := s.redisClient.Subscribe(ctx, presenceChannel, typingChannel)
+	pubsub := s.redisClient.Subscribe(ctx, presenceChannel, typingChannel, userListChannel)
 	defer pubsub.Close()
 
 	for {
@@ -306,6 +358,18 @@ func (s *chatServer) subscribeToPresenceAndTyping(stream pb.Chat_ChatServer, cha
 					Event: &pb.ServerEvent_TypingEvent{TypingEvent: &typingEvent},
 				}); err != nil {
 					log.Printf("Error sending typing event: %v", err)
+					return
+				}
+				continue
+			}
+
+			// Essayer de décoder comme événement de liste d'utilisateurs
+			var userListEvent pb.UserListEvent
+			if json.Unmarshal([]byte(msg.Payload), &userListEvent) == nil && len(userListEvent.Users) > 0 {
+				if err := stream.Send(&pb.ServerEvent{
+					Event: &pb.ServerEvent_UserListEvent{UserListEvent: &userListEvent},
+				}); err != nil {
+					log.Printf("Error sending user list event: %v", err)
 					return
 				}
 			}

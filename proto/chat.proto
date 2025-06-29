@@ -17,6 +17,7 @@ message ClientEvent {
   oneof event {
     ChatMessage chat_message = 1;
     TypingEvent typing_event = 2;
+    DirectMessage direct_message = 3;
   }
 }
 
@@ -27,7 +28,23 @@ message ServerEvent {
     ChatMessage chat_message = 1;
     TypingEvent typing_event = 2;
     PresenceEvent presence_event = 3;
+    UserListEvent user_list_event = 4;
+    DirectMessage direct_message = 5;
   }
+}
+
+// Un message direct entre deux utilisateurs
+message DirectMessage {
+  string sender = 1;
+  string recipient = 2;
+  string message = 3;
+  string channel = 4; // Le canal où le DM a été initié (pour le contexte)
+}
+
+// Un événement de liste d'utilisateurs en ligne
+message UserListEvent {
+  string channel = 1;
+  repeated string users = 2;
 }
 
 // --- Définitions des types d'événements ---

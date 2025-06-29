@@ -27,6 +27,7 @@ type ClientEvent struct {
 	//
 	//	*ClientEvent_ChatMessage
 	//	*ClientEvent_TypingEvent
+	//	*ClientEvent_DirectMessage
 	Event         isClientEvent_Event `protobuf_oneof:"event"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -87,6 +88,15 @@ func (x *ClientEvent) GetTypingEvent() *TypingEvent {
 	return nil
 }
 
+func (x *ClientEvent) GetDirectMessage() *DirectMessage {
+	if x != nil {
+		if x, ok := x.Event.(*ClientEvent_DirectMessage); ok {
+			return x.DirectMessage
+		}
+	}
+	return nil
+}
+
 type isClientEvent_Event interface {
 	isClientEvent_Event()
 }
@@ -99,9 +109,15 @@ type ClientEvent_TypingEvent struct {
 	TypingEvent *TypingEvent `protobuf:"bytes,2,opt,name=typing_event,json=typingEvent,proto3,oneof"`
 }
 
+type ClientEvent_DirectMessage struct {
+	DirectMessage *DirectMessage `protobuf:"bytes,3,opt,name=direct_message,json=directMessage,proto3,oneof"`
+}
+
 func (*ClientEvent_ChatMessage) isClientEvent_Event() {}
 
 func (*ClientEvent_TypingEvent) isClientEvent_Event() {}
+
+func (*ClientEvent_DirectMessage) isClientEvent_Event() {}
 
 type ServerEvent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -110,6 +126,8 @@ type ServerEvent struct {
 	//	*ServerEvent_ChatMessage
 	//	*ServerEvent_TypingEvent
 	//	*ServerEvent_PresenceEvent
+	//	*ServerEvent_UserListEvent
+	//	*ServerEvent_DirectMessage
 	Event         isServerEvent_Event `protobuf_oneof:"event"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -179,6 +197,24 @@ func (x *ServerEvent) GetPresenceEvent() *PresenceEvent {
 	return nil
 }
 
+func (x *ServerEvent) GetUserListEvent() *UserListEvent {
+	if x != nil {
+		if x, ok := x.Event.(*ServerEvent_UserListEvent); ok {
+			return x.UserListEvent
+		}
+	}
+	return nil
+}
+
+func (x *ServerEvent) GetDirectMessage() *DirectMessage {
+	if x != nil {
+		if x, ok := x.Event.(*ServerEvent_DirectMessage); ok {
+			return x.DirectMessage
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Event interface {
 	isServerEvent_Event()
 }
@@ -195,11 +231,145 @@ type ServerEvent_PresenceEvent struct {
 	PresenceEvent *PresenceEvent `protobuf:"bytes,3,opt,name=presence_event,json=presenceEvent,proto3,oneof"`
 }
 
+type ServerEvent_UserListEvent struct {
+	UserListEvent *UserListEvent `protobuf:"bytes,4,opt,name=user_list_event,json=userListEvent,proto3,oneof"`
+}
+
+type ServerEvent_DirectMessage struct {
+	DirectMessage *DirectMessage `protobuf:"bytes,5,opt,name=direct_message,json=directMessage,proto3,oneof"`
+}
+
 func (*ServerEvent_ChatMessage) isServerEvent_Event() {}
 
 func (*ServerEvent_TypingEvent) isServerEvent_Event() {}
 
 func (*ServerEvent_PresenceEvent) isServerEvent_Event() {}
+
+func (*ServerEvent_UserListEvent) isServerEvent_Event() {}
+
+func (*ServerEvent_DirectMessage) isServerEvent_Event() {}
+
+// Un message direct entre deux utilisateurs
+type DirectMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sender        string                 `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	Recipient     string                 `protobuf:"bytes,2,opt,name=recipient,proto3" json:"recipient,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	Channel       string                 `protobuf:"bytes,4,opt,name=channel,proto3" json:"channel,omitempty"` // Le canal où le DM a été initié (pour le contexte)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DirectMessage) Reset() {
+	*x = DirectMessage{}
+	mi := &file_chat_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DirectMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DirectMessage) ProtoMessage() {}
+
+func (x *DirectMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DirectMessage.ProtoReflect.Descriptor instead.
+func (*DirectMessage) Descriptor() ([]byte, []int) {
+	return file_chat_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *DirectMessage) GetSender() string {
+	if x != nil {
+		return x.Sender
+	}
+	return ""
+}
+
+func (x *DirectMessage) GetRecipient() string {
+	if x != nil {
+		return x.Recipient
+	}
+	return ""
+}
+
+func (x *DirectMessage) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *DirectMessage) GetChannel() string {
+	if x != nil {
+		return x.Channel
+	}
+	return ""
+}
+
+// Un événement de liste d'utilisateurs en ligne
+type UserListEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Channel       string                 `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty"`
+	Users         []string               `protobuf:"bytes,2,rep,name=users,proto3" json:"users,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserListEvent) Reset() {
+	*x = UserListEvent{}
+	mi := &file_chat_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserListEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserListEvent) ProtoMessage() {}
+
+func (x *UserListEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_chat_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserListEvent.ProtoReflect.Descriptor instead.
+func (*UserListEvent) Descriptor() ([]byte, []int) {
+	return file_chat_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UserListEvent) GetChannel() string {
+	if x != nil {
+		return x.Channel
+	}
+	return ""
+}
+
+func (x *UserListEvent) GetUsers() []string {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
 
 // Un message de chat standard
 type ChatMessage struct {
@@ -213,7 +383,7 @@ type ChatMessage struct {
 
 func (x *ChatMessage) Reset() {
 	*x = ChatMessage{}
-	mi := &file_chat_proto_msgTypes[2]
+	mi := &file_chat_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -225,7 +395,7 @@ func (x *ChatMessage) String() string {
 func (*ChatMessage) ProtoMessage() {}
 
 func (x *ChatMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[2]
+	mi := &file_chat_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -238,7 +408,7 @@ func (x *ChatMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
 func (*ChatMessage) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{2}
+	return file_chat_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ChatMessage) GetUser() string {
@@ -274,7 +444,7 @@ type TypingEvent struct {
 
 func (x *TypingEvent) Reset() {
 	*x = TypingEvent{}
-	mi := &file_chat_proto_msgTypes[3]
+	mi := &file_chat_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -286,7 +456,7 @@ func (x *TypingEvent) String() string {
 func (*TypingEvent) ProtoMessage() {}
 
 func (x *TypingEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[3]
+	mi := &file_chat_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -299,7 +469,7 @@ func (x *TypingEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TypingEvent.ProtoReflect.Descriptor instead.
 func (*TypingEvent) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{3}
+	return file_chat_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *TypingEvent) GetUser() string {
@@ -335,7 +505,7 @@ type PresenceEvent struct {
 
 func (x *PresenceEvent) Reset() {
 	*x = PresenceEvent{}
-	mi := &file_chat_proto_msgTypes[4]
+	mi := &file_chat_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -347,7 +517,7 @@ func (x *PresenceEvent) String() string {
 func (*PresenceEvent) ProtoMessage() {}
 
 func (x *PresenceEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_chat_proto_msgTypes[4]
+	mi := &file_chat_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -360,7 +530,7 @@ func (x *PresenceEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PresenceEvent.ProtoReflect.Descriptor instead.
 func (*PresenceEvent) Descriptor() ([]byte, []int) {
-	return file_chat_proto_rawDescGZIP(), []int{4}
+	return file_chat_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *PresenceEvent) GetUser() string {
@@ -389,16 +559,27 @@ var File_chat_proto protoreflect.FileDescriptor
 const file_chat_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"chat.proto\x12\x04chat\"\x86\x01\n" +
+	"chat.proto\x12\x04chat\"\xc4\x01\n" +
 	"\vClientEvent\x126\n" +
 	"\fchat_message\x18\x01 \x01(\v2\x11.chat.ChatMessageH\x00R\vchatMessage\x126\n" +
-	"\ftyping_event\x18\x02 \x01(\v2\x11.chat.TypingEventH\x00R\vtypingEventB\a\n" +
-	"\x05event\"\xc4\x01\n" +
+	"\ftyping_event\x18\x02 \x01(\v2\x11.chat.TypingEventH\x00R\vtypingEvent\x12<\n" +
+	"\x0edirect_message\x18\x03 \x01(\v2\x13.chat.DirectMessageH\x00R\rdirectMessageB\a\n" +
+	"\x05event\"\xc1\x02\n" +
 	"\vServerEvent\x126\n" +
 	"\fchat_message\x18\x01 \x01(\v2\x11.chat.ChatMessageH\x00R\vchatMessage\x126\n" +
 	"\ftyping_event\x18\x02 \x01(\v2\x11.chat.TypingEventH\x00R\vtypingEvent\x12<\n" +
-	"\x0epresence_event\x18\x03 \x01(\v2\x13.chat.PresenceEventH\x00R\rpresenceEventB\a\n" +
-	"\x05event\"U\n" +
+	"\x0epresence_event\x18\x03 \x01(\v2\x13.chat.PresenceEventH\x00R\rpresenceEvent\x12=\n" +
+	"\x0fuser_list_event\x18\x04 \x01(\v2\x13.chat.UserListEventH\x00R\ruserListEvent\x12<\n" +
+	"\x0edirect_message\x18\x05 \x01(\v2\x13.chat.DirectMessageH\x00R\rdirectMessageB\a\n" +
+	"\x05event\"y\n" +
+	"\rDirectMessage\x12\x16\n" +
+	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x1c\n" +
+	"\trecipient\x18\x02 \x01(\tR\trecipient\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\x12\x18\n" +
+	"\achannel\x18\x04 \x01(\tR\achannel\"?\n" +
+	"\rUserListEvent\x12\x18\n" +
+	"\achannel\x18\x01 \x01(\tR\achannel\x12\x14\n" +
+	"\x05users\x18\x02 \x03(\tR\x05users\"U\n" +
 	"\vChatMessage\x12\x12\n" +
 	"\x04user\x18\x01 \x01(\tR\x04user\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x18\n" +
@@ -426,27 +607,32 @@ func file_chat_proto_rawDescGZIP() []byte {
 	return file_chat_proto_rawDescData
 }
 
-var file_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_chat_proto_goTypes = []any{
 	(*ClientEvent)(nil),   // 0: chat.ClientEvent
 	(*ServerEvent)(nil),   // 1: chat.ServerEvent
-	(*ChatMessage)(nil),   // 2: chat.ChatMessage
-	(*TypingEvent)(nil),   // 3: chat.TypingEvent
-	(*PresenceEvent)(nil), // 4: chat.PresenceEvent
+	(*DirectMessage)(nil), // 2: chat.DirectMessage
+	(*UserListEvent)(nil), // 3: chat.UserListEvent
+	(*ChatMessage)(nil),   // 4: chat.ChatMessage
+	(*TypingEvent)(nil),   // 5: chat.TypingEvent
+	(*PresenceEvent)(nil), // 6: chat.PresenceEvent
 }
 var file_chat_proto_depIdxs = []int32{
-	2, // 0: chat.ClientEvent.chat_message:type_name -> chat.ChatMessage
-	3, // 1: chat.ClientEvent.typing_event:type_name -> chat.TypingEvent
-	2, // 2: chat.ServerEvent.chat_message:type_name -> chat.ChatMessage
-	3, // 3: chat.ServerEvent.typing_event:type_name -> chat.TypingEvent
-	4, // 4: chat.ServerEvent.presence_event:type_name -> chat.PresenceEvent
-	0, // 5: chat.Chat.Chat:input_type -> chat.ClientEvent
-	1, // 6: chat.Chat.Chat:output_type -> chat.ServerEvent
-	6, // [6:7] is the sub-list for method output_type
-	5, // [5:6] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	4, // 0: chat.ClientEvent.chat_message:type_name -> chat.ChatMessage
+	5, // 1: chat.ClientEvent.typing_event:type_name -> chat.TypingEvent
+	2, // 2: chat.ClientEvent.direct_message:type_name -> chat.DirectMessage
+	4, // 3: chat.ServerEvent.chat_message:type_name -> chat.ChatMessage
+	5, // 4: chat.ServerEvent.typing_event:type_name -> chat.TypingEvent
+	6, // 5: chat.ServerEvent.presence_event:type_name -> chat.PresenceEvent
+	3, // 6: chat.ServerEvent.user_list_event:type_name -> chat.UserListEvent
+	2, // 7: chat.ServerEvent.direct_message:type_name -> chat.DirectMessage
+	0, // 8: chat.Chat.Chat:input_type -> chat.ClientEvent
+	1, // 9: chat.Chat.Chat:output_type -> chat.ServerEvent
+	9, // [9:10] is the sub-list for method output_type
+	8, // [8:9] is the sub-list for method input_type
+	8, // [8:8] is the sub-list for extension type_name
+	8, // [8:8] is the sub-list for extension extendee
+	0, // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_chat_proto_init() }
@@ -457,11 +643,14 @@ func file_chat_proto_init() {
 	file_chat_proto_msgTypes[0].OneofWrappers = []any{
 		(*ClientEvent_ChatMessage)(nil),
 		(*ClientEvent_TypingEvent)(nil),
+		(*ClientEvent_DirectMessage)(nil),
 	}
 	file_chat_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_ChatMessage)(nil),
 		(*ServerEvent_TypingEvent)(nil),
 		(*ServerEvent_PresenceEvent)(nil),
+		(*ServerEvent_UserListEvent)(nil),
+		(*ServerEvent_DirectMessage)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -469,7 +658,7 @@ func file_chat_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_chat_proto_rawDesc), len(file_chat_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
