@@ -15,6 +15,7 @@ import (
 	"github.com/surrealdb/surrealdb.go"
 	"github.com/surrealdb/surrealdb.go/pkg/models"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // AuthClaims defines the JWT claims
@@ -59,6 +60,13 @@ type Message struct {
 	Message   string           `json:"message"`
 	Channel   string           `json:"channel"`
 	Timestamp string           `json:"timestamp"`
+}
+
+// User represents a user record in SurrealDB
+type User struct {
+	ID       *models.RecordID `json:"id,omitempty"`
+	Username string           `json:"username"`
+	Password string           `json:"password"` // Hashed password
 }
 
 type chatServer struct {
@@ -460,7 +468,13 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
+	if err != nil {
+		log.Fatalf("Failed to generate credentials: %v", err)
+	}
+
 	grpcServer := grpc.NewServer(
+		grpc.Creds(creds),
 		grpc.UnaryInterceptor(AuthInterceptor),
 		grpc.StreamInterceptor(AuthStreamInterceptor),
 	)
@@ -477,7 +491,7 @@ func main() {
 	}()
 
 	pb.RegisterChatServer(grpcServer, chatServerInstance)
-	pb.RegisterAuthServer(grpcServer, newAuthServer())
+	pb.RegisterAuthServer(grpcServer, newAuthServer(chatServerInstance.surrealDB))
 	log.Printf("🚀 Chat Server listening at %v", lis.Addr())
 
 	if err := grpcServer.Serve(lis); err != nil {

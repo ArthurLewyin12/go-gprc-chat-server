@@ -27,7 +27,7 @@ func AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServe
 		return nil, status.Errorf(codes.Unauthenticated, "missing authorization token")
 	}
 
-	username, err := ValidateToken(token[0])
+		username, err := ValidateToken(token[0])
 	if err != nil {
 		log.Printf("Invalid token: %v", err)
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
@@ -56,7 +56,7 @@ func AuthStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.Str
 		return status.Errorf(codes.Unauthenticated, "missing authorization token")
 	}
 
-	username, err := ValidateToken(token[0])
+		username, err := ValidateToken(token[0])
 	if err != nil {
 		log.Printf("Invalid token: %v", err)
 		return status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
